@@ -25,6 +25,15 @@ export interface ReminderPayload {
   durationSeconds: number
 }
 
+export type HistoryAction = 'completed' | 'skipped' | 'snoozed'
+
+export interface HistoryEntry {
+  breakTypeId: string
+  name: string
+  action: HistoryAction
+  timestamp: number
+}
+
 export const DEFAULT_SETTINGS: AppSettings = {
   breakTypes: [
     {
@@ -56,5 +65,8 @@ export const IPC_CHANNELS = {
   TIMER_TICK: 'timer:tick',
   REMINDER_TRIGGER: 'reminder:trigger',
   REMINDER_SNOOZE: 'reminder:snooze',
-  REMINDER_SKIP: 'reminder:skip'
+  REMINDER_SKIP: 'reminder:skip',
+  REMINDER_COMPLETE: 'reminder:complete',
+  HISTORY_GET: 'history:get',
+  HISTORY_CHANGED: 'history:changed'
 } as const

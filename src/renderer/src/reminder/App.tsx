@@ -22,7 +22,7 @@ export default function App(): JSX.Element {
       setSecondsLeft((s) => {
         if (s <= 1) {
           if (intervalRef.current) clearInterval(intervalRef.current)
-          window.api.skipReminder(payload.breakTypeId)
+          window.api.completeReminder(payload.breakTypeId)
           return 0
         }
         return s - 1
