@@ -1,7 +1,6 @@
 import { Menu, nativeImage, Tray } from 'electron'
-import { join } from 'path'
 import { BreakStatus } from '../shared/types'
-import { formatDuration } from './utils'
+import { formatDuration, getResourcePath } from './utils'
 
 let tray: Tray | null = null
 
@@ -12,7 +11,7 @@ interface TrayCallbacks {
 }
 
 function createTrayIcon(): Electron.NativeImage {
-  const iconPath = join(__dirname, '../../resources/icon.png')
+  const iconPath = getResourcePath('icon.png')
   const image = nativeImage.createFromPath(iconPath)
   if (!image.isEmpty()) {
     return image.resize({ width: 16, height: 16 })
