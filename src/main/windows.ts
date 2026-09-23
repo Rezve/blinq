@@ -3,7 +3,7 @@ import { join } from 'path'
 import { getResourcePath, is } from './utils'
 
 let settingsWindow: BrowserWindow | null = null
-let reminderWindow: BrowserWindow | null = null
+let reminderWindows: BrowserWindow[] = []
 
 const appIcon = nativeImage.createFromPath(getResourcePath('icon.png'))
 
@@ -59,19 +59,14 @@ export function getSettingsWindow(): BrowserWindow | null {
   return settingsWindow
 }
 
-export function createReminderWindow(): BrowserWindow {
-  if (reminderWindow && !reminderWindow.isDestroyed()) {
-    return reminderWindow
-  }
+function createReminderWindowForDisplay(display: Electron.Display): BrowserWindow {
+  const { width, height } = display.workAreaSize
 
-  const primaryDisplay = screen.getPrimaryDisplay()
-  const { width, height } = primaryDisplay.workAreaSize
-
-  reminderWindow = new BrowserWindow({
+  const win = new BrowserWindow({
     width,
     height,
-    x: primaryDisplay.workArea.x,
-    y: primaryDisplay.workArea.y,
+    x: display.workArea.x,
+    y: display.workArea.y,
     show: false,
     frame: false,
     fullscreenable: false,
@@ -88,28 +83,44 @@ export function createReminderWindow(): BrowserWindow {
     }
   })
 
-  reminderWindow.setAlwaysOnTop(true, 'screen-saver')
-  reminderWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
+  win.setAlwaysOnTop(true, 'screen-saver')
+  win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
 
-  reminderWindow.on('closed', () => {
-    reminderWindow = null
+  win.on('closed', () => {
+    reminderWindows = reminderWindows.filter((w) => w !== win)
   })
 
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    reminderWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/reminder.html`)
+    win.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/reminder.html`)
   } else {
-    reminderWindow.loadFile(join(__dirname, '../renderer/reminder.html'))
+    win.loadFile(join(__dirname, '../renderer/reminder.html'))
   }
 
-  return reminderWindow
+  return win
 }
 
-export function getReminderWindow(): BrowserWindow | null {
-  return reminderWindow
+// Rebuilt from the live display list on every call (rather than reused)
+// so a monitor plugged/unplugged since the last break is picked up, and so
+// every connected screen gets its own overlay, not just the primary one.
+export function createReminderWindows(): BrowserWindow[] {
+  destroyReminderWindows()
+  reminderWindows = screen.getAllDisplays().map(createReminderWindowForDisplay)
+  return reminderWindows
 }
 
-export function hideReminderWindow(): void {
-  if (reminderWindow && !reminderWindow.isDestroyed()) {
-    reminderWindow.hide()
+export function getReminderWindows(): BrowserWindow[] {
+  return reminderWindows
+}
+
+export function hideReminderWindows(): void {
+  for (const win of reminderWindows) {
+    if (!win.isDestroyed()) win.hide()
   }
+}
+
+function destroyReminderWindows(): void {
+  for (const win of reminderWindows) {
+    if (!win.isDestroyed()) win.destroy()
+  }
+  reminderWindows = []
 }

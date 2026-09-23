@@ -4,10 +4,10 @@ import { loadSettings, saveSettings } from './settingsStore'
 import { TimerManager } from './timerManager'
 import { createTray, updateTrayMenu } from './tray'
 import {
-  createReminderWindow,
+  createReminderWindows,
   createSettingsWindow,
   getSettingsWindow,
-  hideReminderWindow
+  hideReminderWindows
 } from './windows'
 
 const timerManager = new TimerManager()
@@ -32,15 +32,16 @@ function broadcastStatus(statuses: BreakStatus[]): void {
 }
 
 function handleReminderTrigger(payload: ReminderPayload): void {
-  const win = createReminderWindow()
-  const send = (): void => win.webContents.send(IPC_CHANNELS.REMINDER_TRIGGER, payload)
-  if (win.webContents.isLoading()) {
-    win.webContents.once('did-finish-load', send)
-  } else {
-    send()
+  for (const win of createReminderWindows()) {
+    const send = (): void => win.webContents.send(IPC_CHANNELS.REMINDER_TRIGGER, payload)
+    if (win.webContents.isLoading()) {
+      win.webContents.once('did-finish-load', send)
+    } else {
+      send()
+    }
+    win.show()
+    win.focus()
   }
-  win.show()
-  win.focus()
 }
 
 const trayCallbacks = {
@@ -88,12 +89,12 @@ function registerIpcHandlers(): void {
 
   ipcMain.handle(IPC_CHANNELS.REMINDER_SNOOZE, (_event, breakTypeId: string) => {
     timerManager.snooze(breakTypeId)
-    hideReminderWindow()
+    hideReminderWindows()
   })
 
   ipcMain.handle(IPC_CHANNELS.REMINDER_SKIP, (_event, breakTypeId: string) => {
     timerManager.skip(breakTypeId)
-    hideReminderWindow()
+    hideReminderWindows()
   })
 }
 
