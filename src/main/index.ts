@@ -1,5 +1,6 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
-import { AppSettings, BreakStatus, IPC_CHANNELS, ReminderPayload } from '../shared/types'
+import { AppSettings, BreakStatus, HistoryAction, IPC_CHANNELS, ReminderPayload } from '../shared/types'
+import { addHistoryEntry, loadHistory } from './historyStore'
 import { loadSettings, saveSettings } from './settingsStore'
 import { TimerManager } from './timerManager'
 import { createTray, updateTrayMenu } from './tray'
@@ -25,6 +26,19 @@ function broadcastStatus(statuses: BreakStatus[]): void {
   if (settingsWindow && !settingsWindow.isDestroyed() && !settingsWindow.webContents.isDestroyed()) {
     try {
       settingsWindow.webContents.send(IPC_CHANNELS.TIMER_STATUS, statuses)
+    } catch {
+      // window torn down mid-send during shutdown; ignore
+    }
+  }
+}
+
+function recordHistory(breakTypeId: string, action: HistoryAction): void {
+  const name = settings.breakTypes.find((bt) => bt.id === breakTypeId)?.name ?? breakTypeId
+  const entries = addHistoryEntry({ breakTypeId, name, action, timestamp: Date.now() })
+  const settingsWindow = getSettingsWindow()
+  if (settingsWindow && !settingsWindow.isDestroyed() && !settingsWindow.webContents.isDestroyed()) {
+    try {
+      settingsWindow.webContents.send(IPC_CHANNELS.HISTORY_CHANGED, entries)
     } catch {
       // window torn down mid-send during shutdown; ignore
     }
@@ -90,12 +104,22 @@ function registerIpcHandlers(): void {
   ipcMain.handle(IPC_CHANNELS.REMINDER_SNOOZE, (_event, breakTypeId: string) => {
     timerManager.snooze(breakTypeId)
     hideReminderWindows()
+    recordHistory(breakTypeId, 'snoozed')
   })
 
   ipcMain.handle(IPC_CHANNELS.REMINDER_SKIP, (_event, breakTypeId: string) => {
     timerManager.skip(breakTypeId)
     hideReminderWindows()
+    recordHistory(breakTypeId, 'skipped')
   })
+
+  ipcMain.handle(IPC_CHANNELS.REMINDER_COMPLETE, (_event, breakTypeId: string) => {
+    timerManager.skip(breakTypeId)
+    hideReminderWindows()
+    recordHistory(breakTypeId, 'completed')
+  })
+
+  ipcMain.handle(IPC_CHANNELS.HISTORY_GET, () => loadHistory())
 }
 
 app.whenReady().then(() => {

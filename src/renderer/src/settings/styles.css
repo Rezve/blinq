@@ -182,3 +182,163 @@ input[type='checkbox'] {
 .btn.danger:hover {
   background: rgba(255, 122, 122, 0.1);
 }
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 28px;
+  flex-shrink: 0;
+  border-bottom: 1px solid #22262e;
+}
+
+.tab {
+  background: transparent;
+  border: none;
+  color: #9aa0a8;
+  font-size: 13px;
+  padding: 10px 4px;
+  margin-right: 20px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.tab:hover {
+  color: #f0f1f3;
+}
+
+.tab.active {
+  color: #ffb454;
+  border-bottom-color: #ffb454;
+}
+
+.dashboard {
+  padding-top: 4px;
+}
+
+.stat-tiles {
+  display: flex;
+  gap: 12px;
+  margin: 28px 0;
+}
+
+.stat-tile {
+  flex: 1;
+  background: #1d2026;
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-value {
+  font-size: 26px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #9aa0a8;
+}
+
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 140px;
+  background: #1d2026;
+  border-radius: 10px;
+  padding: 16px 18px 10px;
+}
+
+.bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+}
+
+.bar-track {
+  flex: 1;
+  width: 100%;
+  max-width: 28px;
+  display: flex;
+  flex-direction: column-reverse;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #14161a;
+}
+
+.bar-segment {
+  width: 100%;
+}
+
+.bar-segment.completed {
+  background: #7fd88f;
+}
+
+.bar-segment.skipped {
+  background: #ff7a7a;
+}
+
+.bar-label {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #7d838c;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #b7bcc3;
+}
+
+.legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.legend-swatch.completed {
+  background: #7fd88f;
+}
+
+.legend-swatch.skipped {
+  background: #ff7a7a;
+}
+
+.stat-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #1d2026;
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.stat-table th,
+.stat-table td {
+  text-align: left;
+  padding: 10px 14px;
+}
+
+.stat-table th {
+  color: #9aa0a8;
+  font-weight: 500;
+  font-size: 12px;
+  border-bottom: 1px solid #22262e;
+}
+
+.stat-table tbody tr:not(:last-child) td {
+  border-bottom: 1px solid #22262e;
+}

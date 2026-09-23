@@ -83,6 +83,18 @@ function createReminderWindowForDisplay(display: Electron.Display): BrowserWindo
     }
   })
 
+  // On Windows, when displays have different DPI scale factors, Chromium can
+  // size/position a BrowserWindow using the wrong monitor's scale at
+  // construction time, leaving it not actually covering the target screen.
+  // Re-applying the same bounds once the window exists forces it to
+  // recompute against the display it's actually on.
+  win.setBounds({
+    x: display.workArea.x,
+    y: display.workArea.y,
+    width: display.workAreaSize.width,
+    height: display.workAreaSize.height
+  })
+
   win.setAlwaysOnTop(true, 'screen-saver')
   win.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true })
 

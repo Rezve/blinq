@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { AppSettings, BreakStatus, BreakType } from '../../../shared/types'
+import { AppSettings, BreakStatus, BreakType, HistoryEntry } from '../../../shared/types'
+import Dashboard from './Dashboard'
 
 function formatRemaining(ms: number): string {
   const totalSeconds = Math.max(0, Math.round(ms / 1000))
@@ -52,6 +53,8 @@ export default function App(): JSX.Element {
   const [statuses, setStatuses] = useState<BreakStatus[]>([])
   const [paused, setPaused] = useState(false)
   const [savedFlash, setSavedFlash] = useState(false)
+  const [history, setHistory] = useState<HistoryEntry[]>([])
+  const [tab, setTab] = useState<'settings' | 'dashboard'>('settings')
 
   useEffect(() => {
     window.api.getSettings().then(setSettings)
@@ -59,16 +62,19 @@ export default function App(): JSX.Element {
       setStatuses(s)
       setPaused(s.some((status) => status.paused))
     })
+    window.api.getHistory().then(setHistory)
 
     const offStatus = window.api.onTimerStatus((s) => {
       setStatuses(s)
       setPaused(s.some((status) => status.paused))
     })
     const offSettings = window.api.onSettingsChanged((s) => setSettings(s))
+    const offHistory = window.api.onHistoryChanged((h) => setHistory(h))
 
     return () => {
       offStatus()
       offSettings()
+      offHistory()
     }
   }, [])
 
@@ -140,7 +146,20 @@ export default function App(): JSX.Element {
         </div>
       </header>
 
+      <div className="tabs">
+        <button className={tab === 'settings' ? 'tab active' : 'tab'} onClick={() => setTab('settings')}>
+          Settings
+        </button>
+        <button className={tab === 'dashboard' ? 'tab active' : 'tab'} onClick={() => setTab('dashboard')}>
+          Dashboard
+        </button>
+      </div>
+
       <div className="content-scroll">
+      {tab === 'dashboard' ? (
+        <Dashboard history={history} />
+      ) : (
+      <>
       <section className="status-panel">
         <h2>Upcoming Breaks</h2>
         {statuses.length === 0 ? (
@@ -233,6 +252,8 @@ export default function App(): JSX.Element {
           </label>
         </div>
       </section>
+      </>
+      )}
       </div>
     </div>
   )

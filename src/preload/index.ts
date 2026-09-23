@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { AppSettings, BreakStatus, IPC_CHANNELS, ReminderPayload } from '../shared/types'
+import { AppSettings, BreakStatus, HistoryEntry, IPC_CHANNELS, ReminderPayload } from '../shared/types'
 
 const api = {
   getSettings: (): Promise<AppSettings> => ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_GET),
@@ -34,7 +34,18 @@ const api = {
   snoozeReminder: (breakTypeId: string): Promise<void> =>
     ipcRenderer.invoke(IPC_CHANNELS.REMINDER_SNOOZE, breakTypeId),
   skipReminder: (breakTypeId: string): Promise<void> =>
-    ipcRenderer.invoke(IPC_CHANNELS.REMINDER_SKIP, breakTypeId)
+    ipcRenderer.invoke(IPC_CHANNELS.REMINDER_SKIP, breakTypeId),
+  completeReminder: (breakTypeId: string): Promise<void> =>
+    ipcRenderer.invoke(IPC_CHANNELS.REMINDER_COMPLETE, breakTypeId),
+
+  getHistory: (): Promise<HistoryEntry[]> => ipcRenderer.invoke(IPC_CHANNELS.HISTORY_GET),
+  onHistoryChanged: (callback: (entries: HistoryEntry[]) => void): (() => void) => {
+    const listener = (_event: unknown, entries: HistoryEntry[]): void => callback(entries)
+    ipcRenderer.on(IPC_CHANNELS.HISTORY_CHANGED, listener)
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.HISTORY_CHANGED, listener)
+    }
+  }
 }
 
 contextBridge.exposeInMainWorld('api', api)
