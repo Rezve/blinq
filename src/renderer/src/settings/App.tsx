@@ -12,6 +12,41 @@ function makeId(): string {
   return `break-${Date.now()}-${Math.floor(Math.random() * 10000)}`
 }
 
+interface NumberFieldProps {
+  min: number
+  value: number
+  onCommit: (value: number) => void
+}
+
+// A plain controlled <input> that clamps on every keystroke can never show
+// an empty or partial value (e.g. clearing the field to type "20" collapses
+// back to the clamped minimum before the next digit lands). This keeps a
+// free-form local draft while focused and only parses/clamps on blur.
+function NumberField({ min, value, onCommit }: NumberFieldProps): JSX.Element {
+  const [draft, setDraft] = useState<string | null>(null)
+
+  const commit = (): void => {
+    if (draft !== null) {
+      const parsed = Math.max(min, Number(draft) || min)
+      if (parsed !== value) onCommit(parsed)
+      setDraft(null)
+    }
+  }
+
+  return (
+    <input
+      type="number"
+      min={min}
+      value={draft ?? value}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') e.currentTarget.blur()
+      }}
+    />
+  )
+}
+
 export default function App(): JSX.Element {
   const [settings, setSettings] = useState<AppSettings | null>(null)
   const [statuses, setStatuses] = useState<BreakStatus[]>([])
@@ -154,28 +189,18 @@ export default function App(): JSX.Element {
               <div className="row">
                 <label>
                   Every (minutes)
-                  <input
-                    type="number"
+                  <NumberField
                     min={1}
                     value={bt.intervalMinutes}
-                    onChange={(e) =>
-                      updateBreakType(bt.id, {
-                        intervalMinutes: Math.max(1, Number(e.target.value) || 1)
-                      })
-                    }
+                    onCommit={(intervalMinutes) => updateBreakType(bt.id, { intervalMinutes })}
                   />
                 </label>
                 <label>
                   Duration (seconds)
-                  <input
-                    type="number"
+                  <NumberField
                     min={5}
                     value={bt.durationSeconds}
-                    onChange={(e) =>
-                      updateBreakType(bt.id, {
-                        durationSeconds: Math.max(5, Number(e.target.value) || 5)
-                      })
-                    }
+                    onCommit={(durationSeconds) => updateBreakType(bt.id, { durationSeconds })}
                   />
                 </label>
                 <button className="btn danger" onClick={() => removeBreakType(bt.id)}>
@@ -192,16 +217,10 @@ export default function App(): JSX.Element {
         <div className="row">
           <label>
             Snooze duration (minutes)
-            <input
-              type="number"
+            <NumberField
               min={1}
               value={settings.snoozeMinutes}
-              onChange={(e) =>
-                persist({
-                  ...settings,
-                  snoozeMinutes: Math.max(1, Number(e.target.value) || 1)
-                })
-              }
+              onCommit={(snoozeMinutes) => persist({ ...settings, snoozeMinutes })}
             />
           </label>
           <label className="checkbox">

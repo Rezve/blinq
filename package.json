@@ -1,6 +1,6 @@
 {
   "name": "break-reminder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Desktop app that reminds you to take breaks at configurable intervals.",
   "main": "./out/main/index.js",
   "author": "break-reminder",
