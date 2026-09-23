@@ -1,11 +1,11 @@
 import { BrowserWindow, nativeImage, screen, shell } from 'electron'
 import { join } from 'path'
-import { is } from './utils'
+import { getResourcePath, is } from './utils'
 
 let settingsWindow: BrowserWindow | null = null
 let reminderWindow: BrowserWindow | null = null
 
-const appIcon = nativeImage.createFromPath(join(__dirname, '../../resources/icon.png'))
+const appIcon = nativeImage.createFromPath(getResourcePath('icon.png'))
 
 export function createSettingsWindow(): BrowserWindow {
   if (settingsWindow && !settingsWindow.isDestroyed()) {
