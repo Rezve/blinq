@@ -1,0 +1,87 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.overlay {
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(160deg, #1a1f2b, #0c0e12);
+  color: #f5f6f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.content {
+  text-align: center;
+  max-width: 480px;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #ffb454;
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+
+.content h1 {
+  font-size: 42px;
+  margin: 0 0 24px;
+}
+
+.timer {
+  font-size: 88px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 24px;
+}
+
+.hint {
+  color: #b7bcc3;
+  font-size: 16px;
+  margin-bottom: 36px;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f5f6f8;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.btn.primary {
+  background: #ffb454;
+  color: #14161a;
+  border-color: #ffb454;
+  font-weight: 600;
+}
+
+.btn.primary:hover {
+  background: #ffc066;
+}
