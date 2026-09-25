@@ -54,7 +54,7 @@ export default function App(): JSX.Element {
   const [paused, setPaused] = useState(false)
   const [savedFlash, setSavedFlash] = useState(false)
   const [history, setHistory] = useState<HistoryEntry[]>([])
-  const [tab, setTab] = useState<'settings' | 'dashboard'>('settings')
+  const [tab, setTab] = useState<'settings' | 'dashboard'>('dashboard')
 
   useEffect(() => {
     window.api.getSettings().then(setSettings)
@@ -140,6 +140,9 @@ export default function App(): JSX.Element {
         <h1>Break Reminder</h1>
         <div className="header-actions">
           {savedFlash && <span className="saved-flash">Saved</span>}
+          <button className="btn" onClick={() => window.api.showWelcome()}>
+            Verse of the Moment
+          </button>
           <button className={paused ? 'btn primary' : 'btn'} onClick={togglePause}>
             {paused ? 'Resume Timers' : 'Pause Timers'}
           </button>
@@ -147,11 +150,11 @@ export default function App(): JSX.Element {
       </header>
 
       <div className="tabs">
-        <button className={tab === 'settings' ? 'tab active' : 'tab'} onClick={() => setTab('settings')}>
-          Settings
-        </button>
         <button className={tab === 'dashboard' ? 'tab active' : 'tab'} onClick={() => setTab('dashboard')}>
           Dashboard
+        </button>
+        <button className={tab === 'settings' ? 'tab active' : 'tab'} onClick={() => setTab('settings')}>
+          Settings
         </button>
       </div>
 

@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { AppSettings, BreakStatus, HistoryEntry, IPC_CHANNELS, ReminderPayload } from '../shared/types'
+import { AppSettings, BreakStatus, HistoryEntry, IPC_CHANNELS, ReminderPayload, Verse } from '../shared/types'
 
 const api = {
   getSettings: (): Promise<AppSettings> => ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_GET),
@@ -37,6 +37,11 @@ const api = {
     ipcRenderer.invoke(IPC_CHANNELS.REMINDER_SKIP, breakTypeId),
   completeReminder: (breakTypeId: string): Promise<void> =>
     ipcRenderer.invoke(IPC_CHANNELS.REMINDER_COMPLETE, breakTypeId),
+
+  getWelcomeVerse: (): Promise<Verse> => ipcRenderer.invoke(IPC_CHANNELS.WELCOME_VERSE),
+  welcomeOpenSettings: (): Promise<void> => ipcRenderer.invoke(IPC_CHANNELS.WELCOME_OPEN_SETTINGS),
+  showWelcome: (): Promise<void> => ipcRenderer.invoke(IPC_CHANNELS.WELCOME_SHOW),
+  welcomeDismiss: (): Promise<void> => ipcRenderer.invoke(IPC_CHANNELS.WELCOME_DISMISS),
 
   getHistory: (): Promise<HistoryEntry[]> => ipcRenderer.invoke(IPC_CHANNELS.HISTORY_GET),
   onHistoryChanged: (callback: (entries: HistoryEntry[]) => void): (() => void) => {

@@ -3,6 +3,7 @@ import { join } from 'path'
 import { getResourcePath, is } from './utils'
 
 let settingsWindow: BrowserWindow | null = null
+let welcomeWindow: BrowserWindow | null = null
 let reminderWindows: BrowserWindow[] = []
 
 const appIcon = nativeImage.createFromPath(getResourcePath('icon.png'))
@@ -57,6 +58,60 @@ export function createSettingsWindow(): BrowserWindow {
 
 export function getSettingsWindow(): BrowserWindow | null {
   return settingsWindow
+}
+
+export function createWelcomeWindow(): BrowserWindow {
+  if (welcomeWindow && !welcomeWindow.isDestroyed()) {
+    welcomeWindow.show()
+    welcomeWindow.focus()
+    return welcomeWindow
+  }
+
+  const display = screen.getPrimaryDisplay()
+  const win = new BrowserWindow({
+    ...display.workArea,
+    frame: false,
+    movable: false,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    show: false,
+    autoHideMenuBar: true,
+    title: 'Break Reminder',
+    icon: appIcon,
+    backgroundColor: '#0c0e12',
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false
+    }
+  })
+  welcomeWindow = win
+  // Re-apply bounds so mixed-DPI setups size it against the right display.
+  win.setBounds(display.workArea)
+  win.webContents.on('before-input-event', (event, input) => {
+    if (input.type === 'keyDown' && input.key === 'Escape') {
+      event.preventDefault()
+      win.close()
+    }
+  })
+
+  win.on('ready-to-show', () => win.show())
+  win.on('closed', () => {
+    welcomeWindow = null
+  })
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    win.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/welcome.html`)
+  } else {
+    win.loadFile(join(__dirname, '../renderer/welcome.html'))
+  }
+
+  return win
+}
+
+export function closeWelcomeWindow(): void {
+  if (welcomeWindow && !welcomeWindow.isDestroyed()) welcomeWindow.close()
 }
 
 function createReminderWindowForDisplay(display: Electron.Display): BrowserWindow {

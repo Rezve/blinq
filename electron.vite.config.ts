@@ -31,7 +31,8 @@ export default defineConfig({
       rollupOptions: {
         input: {
           settings: resolve('src/renderer/index.html'),
-          reminder: resolve('src/renderer/reminder.html')
+          reminder: resolve('src/renderer/reminder.html'),
+          welcome: resolve('src/renderer/welcome.html')
         }
       }
     },

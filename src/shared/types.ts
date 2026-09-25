@@ -34,6 +34,16 @@ export interface HistoryEntry {
   timestamp: number
 }
 
+export interface Verse {
+  arabic: string
+  translation: string
+  surahName: string
+  surahArabic: string
+  surahTranslation: string
+  surahNumber: number
+  verseNumber: number
+}
+
 export const DEFAULT_SETTINGS: AppSettings = {
   breakTypes: [
     {
@@ -68,5 +78,9 @@ export const IPC_CHANNELS = {
   REMINDER_SKIP: 'reminder:skip',
   REMINDER_COMPLETE: 'reminder:complete',
   HISTORY_GET: 'history:get',
-  HISTORY_CHANGED: 'history:changed'
+  HISTORY_CHANGED: 'history:changed',
+  WELCOME_VERSE: 'welcome:verse',
+  WELCOME_OPEN_SETTINGS: 'welcome:open-settings',
+  WELCOME_DISMISS: 'welcome:dismiss',
+  WELCOME_SHOW: 'welcome:show'
 } as const

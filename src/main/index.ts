@@ -2,11 +2,14 @@ import { app, BrowserWindow, ipcMain } from 'electron'
 import { AppSettings, BreakStatus, HistoryAction, IPC_CHANNELS, ReminderPayload } from '../shared/types'
 import { addHistoryEntry, loadHistory } from './historyStore'
 import { loadSettings, saveSettings } from './settingsStore'
+import { getRandomVerse } from './verses'
 import { TimerManager } from './timerManager'
 import { createTray, updateTrayMenu } from './tray'
 import {
+  closeWelcomeWindow,
   createReminderWindows,
   createSettingsWindow,
+  createWelcomeWindow,
   getSettingsWindow,
   hideReminderWindows
 } from './windows'
@@ -16,7 +19,9 @@ let settings: AppSettings = loadSettings()
 
 function applyLoginItemSetting(): void {
   if (process.platform === 'win32' || process.platform === 'darwin') {
-    app.setLoginItemSettings({ openAtLogin: settings.launchOnStartup })
+    // In dev the executable is the bare electron.exe; registering it as a login item
+    // launches Electron's default "get started" window (no app path) at startup.
+    app.setLoginItemSettings({ openAtLogin: app.isPackaged && settings.launchOnStartup })
   }
 }
 
@@ -59,6 +64,9 @@ function handleReminderTrigger(payload: ReminderPayload): void {
 }
 
 const trayCallbacks = {
+  onShowVerse: () => {
+    createWelcomeWindow()
+  },
   onOpenSettings: () => {
     createSettingsWindow()
   },
@@ -119,10 +127,30 @@ function registerIpcHandlers(): void {
     recordHistory(breakTypeId, 'completed')
   })
 
+  ipcMain.handle(IPC_CHANNELS.WELCOME_VERSE, () => getRandomVerse())
+  ipcMain.handle(IPC_CHANNELS.WELCOME_OPEN_SETTINGS, () => {
+    closeWelcomeWindow()
+    createSettingsWindow()
+  })
+  ipcMain.handle(IPC_CHANNELS.WELCOME_SHOW, () => {
+    createWelcomeWindow()
+  })
+  ipcMain.handle(IPC_CHANNELS.WELCOME_DISMISS, () => closeWelcomeWindow())
+
   ipcMain.handle(IPC_CHANNELS.HISTORY_GET, () => loadHistory())
 }
 
+const gotLock = app.requestSingleInstanceLock()
+if (!gotLock) {
+  app.quit()
+}
+
+app.on('second-instance', () => {
+  createSettingsWindow()
+})
+
 app.whenReady().then(() => {
+  if (!gotLock) return
   registerIpcHandlers()
   applyLoginItemSetting()
 
@@ -131,7 +159,7 @@ app.whenReady().then(() => {
   timerManager.start(settings)
 
   createTray(trayCallbacks)
-  createSettingsWindow()
+  createWelcomeWindow()
 
   app.on('activate', () => {
     createSettingsWindow()
