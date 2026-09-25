@@ -6,6 +6,7 @@ let tray: Tray | null = null
 
 interface TrayCallbacks {
   onOpenSettings: () => void
+  onShowVerse: () => void
   onTogglePause: () => void
   onQuit: () => void
 }
@@ -50,6 +51,7 @@ export function updateTrayMenu(
       label: paused ? 'Resume Timers' : 'Pause Timers',
       click: callbacks.onTogglePause
     },
+    { label: 'Show Verse', click: callbacks.onShowVerse },
     { label: 'Open Settings', click: callbacks.onOpenSettings },
     { type: 'separator' },
     {

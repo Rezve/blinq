@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+    />
+    <title>Break Reminder</title>
+    <link rel="stylesheet" href="/src/welcome/styles.css" />
+  </head>
+  <body>
+    <main class="welcome">
+      <p class="eyebrow">Break Reminder</p>
+      <div class="ornament" aria-hidden="true"><span></span><i>❖</i><span></span></div>
+      <p id="arabic" lang="ar" dir="rtl"></p>
+      <p id="translation" lang="bn"></p>
+      <div class="actions">
+        <button id="open-settings" class="primary">Open Settings</button>
+        <button id="dismiss">Close (Esc)</button>
+      </div>
+      <footer id="reference"></footer>
+    </main>
+    <script type="module" src="/src/welcome/main.ts"></script>
+  </body>
+</html>

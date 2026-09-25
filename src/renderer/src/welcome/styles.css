@@ -1,0 +1,140 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'Nirmala UI', 'Kalpurush', 'Noto Sans Bengali', 'Segoe UI', sans-serif;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(214, 170, 90, 0.14), transparent 60%),
+    linear-gradient(160deg, #10221f, #08110f);
+  color: #f3ecd8;
+  overflow: hidden;
+}
+
+.welcome {
+  position: relative;
+  height: 100%;
+  padding: 5vh 10vw 9vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #b9a36a;
+}
+
+.ornament {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 14px 0 22px;
+  color: #d6aa5a;
+}
+
+.ornament span {
+  width: 140px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #d6aa5a);
+}
+
+.ornament span:last-child {
+  transform: scaleX(-1);
+}
+
+#arabic {
+  margin: 0 0 22px;
+  max-width: 100%;
+  font-family: 'Amiri', 'Scheherazade New', 'Traditional Arabic', 'Sakkal Majalla', 'Segoe UI', serif;
+  line-height: 1.9;
+  color: #e8c777;
+}
+
+#arabic[data-size='lg'] {
+  font-size: clamp(38px, 5.5vw, 68px);
+}
+#arabic[data-size='sm'] {
+  font-size: clamp(30px, 4.2vw, 52px);
+}
+#arabic[data-size='xs'] {
+  font-size: clamp(24px, 3vw, 36px);
+  line-height: 1.8;
+}
+
+#translation {
+  margin: 0;
+  max-width: min(1100px, 100%);
+  line-height: 1.75;
+  font-weight: 400;
+  color: #f7f1e0;
+}
+
+#translation[data-size='lg'] {
+  font-size: clamp(28px, 3.4vw, 46px);
+}
+#translation[data-size='md'] {
+  font-size: clamp(24px, 2.9vw, 38px);
+}
+#translation[data-size='sm'] {
+  font-size: clamp(20px, 2.3vw, 30px);
+}
+#translation[data-size='xs'] {
+  font-size: clamp(17px, 1.9vw, 24px);
+  line-height: 1.65;
+}
+
+#reference {
+  position: absolute;
+  bottom: 4vh;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: clamp(15px, 1.5vw, 22px);
+  letter-spacing: 0.04em;
+  color: #b9a36a;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+button {
+  padding: 10px 24px;
+  font: inherit;
+  font-size: 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(214, 170, 90, 0.45);
+  background: transparent;
+  color: #f3ecd8;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+button:hover {
+  background: rgba(214, 170, 90, 0.14);
+}
+
+button.primary {
+  background: #d6aa5a;
+  border-color: #d6aa5a;
+  color: #10221f;
+  font-weight: 600;
+}
+
+button.primary:hover {
+  background: #e3ba6c;
+}
