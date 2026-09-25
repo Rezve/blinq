@@ -5,8 +5,8 @@ import { HistoryEntry } from '../shared/types'
 
 const historyPath = join(app.getPath('userData'), 'history.json')
 
-const MAX_ENTRIES = 2000
-const MAX_AGE_MS = 90 * 24 * 60 * 60 * 1000
+const MAX_ENTRIES = 50000
+const MAX_AGE_MS = 400 * 24 * 60 * 60 * 1000
 
 let cache: HistoryEntry[] | null = null
 

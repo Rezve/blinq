@@ -23,7 +23,8 @@ export function createSettingsWindow(): BrowserWindow {
     fullscreenable: false,
     show: false,
     autoHideMenuBar: true,
-    title: 'Blinq — Settings',
+    title: 'Blinq',
+    backgroundColor: '#14161a',
     icon: appIcon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),

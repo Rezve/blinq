@@ -2,13 +2,6 @@ import { useEffect, useState } from 'react'
 import { AppSettings, BreakStatus, BreakType, HistoryEntry } from '../../../shared/types'
 import Dashboard from './Dashboard'
 
-function formatRemaining(ms: number): string {
-  const totalSeconds = Math.max(0, Math.round(ms / 1000))
-  const minutes = Math.floor(totalSeconds / 60)
-  const seconds = totalSeconds % 60
-  return `${minutes}:${seconds.toString().padStart(2, '0')}`
-}
-
 function makeId(): string {
   return `break-${Date.now()}-${Math.floor(Math.random() * 10000)}`
 }
@@ -160,25 +153,9 @@ export default function App(): JSX.Element {
 
       <div className="content-scroll">
       {tab === 'dashboard' ? (
-        <Dashboard history={history} />
+        <Dashboard history={history} statuses={statuses} breakTypes={settings.breakTypes} />
       ) : (
       <>
-      <section className="status-panel">
-        <h2>Upcoming Breaks</h2>
-        {statuses.length === 0 ? (
-          <p className="muted">No active break types. Add one below.</p>
-        ) : (
-          <ul className="status-list">
-            {statuses.map((s) => (
-              <li key={s.breakTypeId}>
-                <span>{s.name}</span>
-                <span className="countdown">{formatRemaining(s.msRemaining)}</span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
       <section>
         <div className="section-header">
           <h2>Break Types</h2>
@@ -252,6 +229,14 @@ export default function App(): JSX.Element {
               onChange={(e) => persist({ ...settings, launchOnStartup: e.target.checked })}
             />
             Launch on system startup
+          </label>
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              checked={settings.mergeOverlapping}
+              onChange={(e) => persist({ ...settings, mergeOverlapping: e.target.checked })}
+            />
+            Merge overlapping reminders (longer break replaces shorter ones)
           </label>
         </div>
       </section>

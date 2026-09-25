@@ -1,36 +1,96 @@
 import { useMemo, useState } from 'react'
-import { HistoryEntry } from '../../../shared/types'
+import { BreakStatus, BreakType, HistoryEntry } from '../../../shared/types'
+import UpcomingBreaks from './UpcomingBreaks'
 
 const DAY_MS = 24 * 60 * 60 * 1000
-const WINDOW_DAYS = 7
+
+type Range = 'today' | 'week' | 'month' | 'year'
+
+const RANGES: { id: Range; label: string; title: string }[] = [
+  { id: 'today', label: 'Today', title: 'Today by Hour' },
+  { id: 'week', label: 'Week', title: 'Last 7 Days' },
+  { id: 'month', label: 'Month', title: 'Last 30 Days' },
+  { id: 'year', label: 'Year', title: 'Last 12 Months' }
+]
 
 function dayKey(timestamp: number): string {
   const d = new Date(timestamp)
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`
 }
 
-function dayLabel(timestamp: number): string {
-  return new Date(timestamp).toLocaleDateString(undefined, { weekday: 'short' })
+function monthKey(timestamp: number): string {
+  const d = new Date(timestamp)
+  return `${d.getFullYear()}-${d.getMonth()}`
 }
 
-interface DayBucket {
+interface Bucket {
   key: string
   label: string
+  fullLabel: string
   completed: number
   skipped: number
   snoozed: number
 }
 
-function buildDayBuckets(entries: HistoryEntry[]): DayBucket[] {
-  const now = Date.now()
-  const buckets: DayBucket[] = []
-  for (let i = WINDOW_DAYS - 1; i >= 0; i--) {
-    const t = now - i * DAY_MS
-    buckets.push({ key: dayKey(t), label: dayLabel(t), completed: 0, skipped: 0, snoozed: 0 })
+function hourKey(timestamp: number): string {
+  return `${dayKey(timestamp)}-${new Date(timestamp).getHours()}`
+}
+
+function bucketKeyFn(range: Range): (timestamp: number) => string {
+  if (range === 'today') return hourKey
+  return range === 'year' ? monthKey : dayKey
+}
+
+function buildBuckets(entries: HistoryEntry[], range: Range): Bucket[] {
+  const now = new Date()
+  const buckets: Bucket[] = []
+  if (range === 'today') {
+    for (let h = 0; h < 24; h++) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h)
+      buckets.push({
+        key: hourKey(d.getTime()),
+        label: h % 6 === 0 ? d.toLocaleTimeString(undefined, { hour: 'numeric' }) : '',
+        fullLabel: d.toLocaleTimeString(undefined, { hour: 'numeric' }),
+        completed: 0,
+        skipped: 0,
+        snoozed: 0
+      })
+    }
+  } else if (range === 'year') {
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      buckets.push({
+        key: monthKey(d.getTime()),
+        label: d.toLocaleDateString(undefined, { month: 'short' }),
+        fullLabel: d.toLocaleDateString(undefined, { month: 'short', year: 'numeric' }),
+        completed: 0,
+        skipped: 0,
+        snoozed: 0
+      })
+    }
+  } else {
+    const days = range === 'week' ? 7 : 30
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i)
+      const showLabel = range === 'week' || i === 0 || i % 5 === 0
+      buckets.push({
+        key: dayKey(d.getTime()),
+        label: !showLabel
+          ? ''
+          : range === 'week'
+            ? d.toLocaleDateString(undefined, { weekday: 'short' })
+            : String(d.getDate()),
+        fullLabel: d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+        completed: 0,
+        skipped: 0,
+        snoozed: 0
+      })
+    }
   }
+  const keyFn = bucketKeyFn(range)
   const byKey = new Map(buckets.map((b) => [b.key, b]))
   for (const entry of entries) {
-    const bucket = byKey.get(dayKey(entry.timestamp))
+    const bucket = byKey.get(keyFn(entry.timestamp))
     if (!bucket) continue
     if (entry.action === 'completed') bucket.completed++
     else if (entry.action === 'skipped') bucket.skipped++
@@ -84,22 +144,32 @@ function computeBreakTypeStats(entries: HistoryEntry[]): BreakTypeStat[] {
 
 interface DashboardProps {
   history: HistoryEntry[]
+  statuses: BreakStatus[]
+  breakTypes: BreakType[]
 }
 
-export default function Dashboard({ history }: DashboardProps): JSX.Element {
-  const buckets = useMemo(() => buildDayBuckets(history), [history])
+export default function Dashboard({ history, statuses, breakTypes }: DashboardProps): JSX.Element {
+  const [range, setRange] = useState<Range>('today')
+  const buckets = useMemo(() => buildBuckets(history, range), [history, range])
   const streak = useMemo(() => computeStreak(history), [history])
 
+  const keyFn = bucketKeyFn(range)
   const todayKey = dayKey(Date.now())
+  // Nothing selected means "today", in every range. Clicking a bar narrows to that bucket.
   const [selectedKey, setSelectedKey] = useState<string | null>(null)
-  const activeKey = selectedKey ?? todayKey
-  const isToday = activeKey === todayKey
+  const activeKey = selectedKey
+  // Week/month highlight today's bar by default; today/year have no single "today" bar.
+  const highlightKey = selectedKey ?? (range === 'week' || range === 'month' ? todayKey : null)
+  const isToday = selectedKey === null
   const activeBucket = buckets.find((b) => b.key === activeKey)
-  const activeLabel = isToday ? 'today' : (activeBucket?.label ?? '')
+  const activeLabel = isToday ? 'today' : (activeBucket?.fullLabel ?? '')
 
   const dayEntries = useMemo(
-    () => history.filter((e) => dayKey(e.timestamp) === activeKey),
-    [history, activeKey]
+    () =>
+      history.filter((e) =>
+        activeKey === null ? dayKey(e.timestamp) === todayKey : keyFn(e.timestamp) === activeKey
+      ),
+    [history, activeKey, range, todayKey]
   )
   const breakTypeStats = useMemo(() => computeBreakTypeStats(dayEntries), [dayEntries])
 
@@ -112,6 +182,8 @@ export default function Dashboard({ history }: DashboardProps): JSX.Element {
 
   return (
     <div className="dashboard">
+      <UpcomingBreaks statuses={statuses} breakTypes={breakTypes} />
+
       <div className="stat-tiles">
         <div className="stat-tile">
           <span className="stat-value">{dayCompleted}</span>
@@ -128,11 +200,29 @@ export default function Dashboard({ history }: DashboardProps): JSX.Element {
       </div>
 
       <section>
-        <h2>Last 7 Days</h2>
+        <div className="range-header">
+          <h2>{RANGES.find((r) => r.id === range)?.title}</h2>
+          <div className="range-toggle" role="group" aria-label="Chart range">
+            {RANGES.map((r) => (
+              <button
+                type="button"
+                key={r.id}
+                className={`range-btn${r.id === range ? ' active' : ''}`}
+                aria-pressed={r.id === range}
+                onClick={() => {
+                  setRange(r.id)
+                  setSelectedKey(null)
+                }}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+        </div>
         {history.length === 0 ? (
           <p className="muted">No break activity recorded yet.</p>
         ) : (
-          <div className="bar-chart">
+          <div className={`bar-chart${range === 'month' || range === 'today' ? ' dense' : ''}`}>
             {buckets.map((b) => {
               const total = b.completed + b.skipped
               const completedPct = total === 0 ? 0 : (b.completed / maxCount) * 100
@@ -140,10 +230,10 @@ export default function Dashboard({ history }: DashboardProps): JSX.Element {
               return (
                 <button
                   type="button"
-                  className={`bar-col${b.key === activeKey ? ' selected' : ''}`}
+                  className={`bar-col${b.key === highlightKey ? ' selected' : ''}`}
                   key={b.key}
-                  onClick={() => setSelectedKey(b.key === todayKey ? null : b.key)}
-                  aria-pressed={b.key === activeKey}
+                  onClick={() => setSelectedKey(b.key === highlightKey ? null : b.key)}
+                  aria-pressed={b.key === highlightKey}
                 >
                   <div className="bar-track">
                     <div className="bar-segment skipped" style={{ height: `${skippedPct}%` }} />
@@ -168,7 +258,7 @@ export default function Dashboard({ history }: DashboardProps): JSX.Element {
       <section>
         <h2>By Break Type ({isToday ? 'Today' : activeLabel})</h2>
         {breakTypeStats.length === 0 ? (
-          <p className="muted">Nothing to show for this day.</p>
+          <p className="muted">Nothing to show for this period.</p>
         ) : (
           <table className="stat-table">
             <thead>
