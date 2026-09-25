@@ -23,7 +23,7 @@ export function createSettingsWindow(): BrowserWindow {
     fullscreenable: false,
     show: false,
     autoHideMenuBar: true,
-    title: 'Break Reminder — Settings',
+    title: 'Blinq — Settings',
     icon: appIcon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -78,7 +78,7 @@ export function createWelcomeWindow(): BrowserWindow {
     fullscreenable: false,
     show: false,
     autoHideMenuBar: true,
-    title: 'Break Reminder',
+    title: 'Blinq',
     icon: appIcon,
     backgroundColor: '#0c0e12',
     webPreferences: {

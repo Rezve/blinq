@@ -137,7 +137,7 @@ export default function App(): JSX.Element {
   return (
     <div className="page">
       <header className="header">
-        <h1>Break Reminder</h1>
+        <h1>Blinq</h1>
         <div className="header-actions">
           {savedFlash && <span className="saved-flash">Saved</span>}
           <button className="btn" onClick={() => window.api.showWelcome()}>

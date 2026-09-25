@@ -1,7 +1,7 @@
-import type { BreakReminderApi } from './index'
+import type { BlinqApi } from './index'
 
 declare global {
   interface Window {
-    api: BreakReminderApi
+    api: BlinqApi
   }
 }

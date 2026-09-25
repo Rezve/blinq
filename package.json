@@ -1,9 +1,9 @@
 {
-  "name": "break-reminder",
+  "name": "blinq",
   "version": "1.0.5",
   "description": "Desktop app that reminds you to take breaks at configurable intervals.",
   "main": "./out/main/index.js",
-  "author": "break-reminder",
+  "author": "blinq",
   "private": true,
   "scripts": {
     "dev": "electron-vite dev",

@@ -1,11 +1,11 @@
-# Break Reminder
+# Blinq
 
 A lightweight Windows desktop app that reminds you to take breaks at intervals you configure. Set up as many break types as you like — a short eye-rest break every 20 minutes, a longer stretch break every hour — and it'll nudge you with a full-screen reminder when it's time.
 
 <p align="center">
-  <img src="docs/settings-window.png" alt="Break Reminder settings window" width="500">
+  <img src="docs/settings-window.png" alt="Blinq settings window" width="500">
   &nbsp;&nbsp;
-  <img src="docs/reminder-overlay.png" alt="Break Reminder full-screen reminder overlay" width="500">
+  <img src="docs/reminder-overlay.png" alt="Blinq full-screen reminder overlay" width="500">
 </p>
 
 ## Features
@@ -43,7 +43,7 @@ This starts the app with hot reload for the renderer.
 npm run dist
 ```
 
-This produces an NSIS installer in `dist/`. Run the installer, and Break Reminder will be available as a regular Windows app.
+This produces an NSIS installer in `dist/`. Run the installer, and Blinq will be available as a regular Windows app.
 
 ### Using the app
 
@@ -52,7 +52,7 @@ This produces an NSIS installer in `dist/`. Run the installer, and Break Reminde
 3. When a break is due, a full-screen reminder appears with a countdown. Click **Skip** to end it early, or **Snooze** to postpone it (snooze length is configurable under **General**).
 4. Use the tray icon (bottom-right of your taskbar) to **Pause/Resume** timers, reopen **Settings**, or **Quit** the app entirely.
 5. Closing the Settings window just hides it — the app keeps running and reminding you from the tray. Use **Quit** from the tray menu to fully exit.
-6. Enable **Launch on system startup** under **General** to have Break Reminder start automatically when you log in.
+6. Enable **Launch on system startup** under **General** to have Blinq start automatically when you log in.
 
 Settings are saved automatically and persist across restarts.
 

@@ -1,5 +1,5 @@
-appId: com.breakreminder.app
-productName: Break Reminder
+appId: com.blinq.app
+productName: Blinq
 directories:
   buildResources: build
   output: dist
