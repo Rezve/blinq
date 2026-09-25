@@ -10,6 +10,7 @@ export interface AppSettings {
   breakTypes: BreakType[]
   snoozeMinutes: number
   launchOnStartup: boolean
+  mergeOverlapping: boolean
 }
 
 export interface BreakStatus {
@@ -62,7 +63,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
     }
   ],
   snoozeMinutes: 5,
-  launchOnStartup: false
+  launchOnStartup: false,
+  mergeOverlapping: true
 }
 
 export const IPC_CHANNELS = {

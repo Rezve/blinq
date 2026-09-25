@@ -122,7 +122,7 @@ function registerIpcHandlers(): void {
   })
 
   ipcMain.handle(IPC_CHANNELS.REMINDER_COMPLETE, (_event, breakTypeId: string) => {
-    timerManager.skip(breakTypeId)
+    timerManager.complete(breakTypeId)
     hideReminderWindows()
     recordHistory(breakTypeId, 'completed')
   })

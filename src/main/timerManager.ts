@@ -8,6 +8,9 @@ interface TrackedBreak {
 }
 
 const TICK_MS = 1000
+const MERGE_WINDOW_MS = 60 * 1000
+const QUEUE_GAP_MS = 15 * 1000
+const ACTIVE_GRACE_SECONDS = 120
 
 export class TimerManager extends EventEmitter {
   private breaks: Map<string, TrackedBreak> = new Map()
@@ -15,6 +18,8 @@ export class TimerManager extends EventEmitter {
   private pausedAt = 0
   private intervalHandle: NodeJS.Timeout | null = null
   private snoozeMinutes = 5
+  private mergeOverlapping = true
+  private active: { breakTypeId: string; startedAt: number } | null = null
 
   start(settings: AppSettings): void {
     this.applySettings(settings)
@@ -36,6 +41,7 @@ export class TimerManager extends EventEmitter {
 
   applySettings(settings: AppSettings): void {
     this.snoozeMinutes = settings.snoozeMinutes
+    this.mergeOverlapping = settings.mergeOverlapping ?? true
     const now = Date.now()
     const nextBreaks = new Map<string, TrackedBreak>()
     for (const breakType of settings.breakTypes) {
@@ -77,14 +83,35 @@ export class TimerManager extends EventEmitter {
     const tracked = this.breaks.get(breakTypeId)
     if (!tracked) return
     tracked.nextTriggerAt = Date.now() + this.snoozeMinutes * 60 * 1000
+    this.endIfActive(breakTypeId)
     this.emitStatus()
   }
 
   skip(breakTypeId: string): void {
     const tracked = this.breaks.get(breakTypeId)
     if (!tracked) return
-    tracked.nextTriggerAt = Date.now() + tracked.breakType.intervalMinutes * 60 * 1000
+    this.restart(tracked, Date.now())
+    this.endIfActive(breakTypeId)
     this.emitStatus()
+  }
+
+  /** A finished break also resets every shorter break it covers. */
+  complete(breakTypeId: string): void {
+    const tracked = this.breaks.get(breakTypeId)
+    if (!tracked) return
+    const now = Date.now()
+    this.restart(tracked, now)
+    if (this.mergeOverlapping) {
+      for (const t of this.breaks.values()) {
+        if (t.breakType.durationSeconds < tracked.breakType.durationSeconds) this.restart(t, now)
+      }
+    }
+    this.endIfActive(breakTypeId)
+    this.emitStatus()
+  }
+
+  private endIfActive(breakTypeId: string): void {
+    if (this.active?.breakTypeId === breakTypeId) this.finishActive()
   }
 
   getStatuses(): BreakStatus[] {
@@ -107,17 +134,58 @@ export class TimerManager extends EventEmitter {
   private tick(): void {
     if (this.paused) return
     const now = Date.now()
-    for (const tracked of this.breaks.values()) {
-      if (tracked.nextTriggerAt <= now) {
-        this.emit('trigger', {
-          breakTypeId: tracked.breakType.id,
-          name: tracked.breakType.name,
-          durationSeconds: tracked.breakType.durationSeconds
-        })
-        tracked.nextTriggerAt = now + tracked.breakType.intervalMinutes * 60 * 1000
+    this.expireStaleActive(now)
+    // Only one overlay at a time; anything due meanwhile waits (it stays due).
+    if (!this.active) this.triggerNext(now)
+    this.emitStatus()
+  }
+
+  private triggerNext(now: number): void {
+    const all = Array.from(this.breaks.values())
+    if (!all.some((t) => t.nextTriggerAt <= now)) return
+
+    // Reminders due within the merge window are treated as overlapping.
+    const window = this.mergeOverlapping ? MERGE_WINDOW_MS : 0
+    const candidates = all.filter((t) => t.nextTriggerAt <= now + window)
+    const winner = candidates.reduce((best, t) =>
+      t.breakType.durationSeconds > best.breakType.durationSeconds ? t : best
+    )
+
+    if (this.mergeOverlapping) {
+      // Shorter breaks are covered by the longer one; restart their countdowns.
+      for (const t of candidates) {
+        if (t !== winner && t.breakType.durationSeconds <= winner.breakType.durationSeconds) {
+          this.restart(t, now)
+        }
       }
     }
-    this.emitStatus()
+
+    this.active = { breakTypeId: winner.breakType.id, startedAt: now }
+    this.emit('trigger', {
+      breakTypeId: winner.breakType.id,
+      name: winner.breakType.name,
+      durationSeconds: winner.breakType.durationSeconds
+    })
+  }
+
+  private restart(tracked: TrackedBreak, now: number): void {
+    tracked.nextTriggerAt = now + tracked.breakType.intervalMinutes * 60 * 1000
+  }
+
+  private expireStaleActive(now: number): void {
+    if (!this.active) return
+    const tracked = this.breaks.get(this.active.breakTypeId)
+    const limitMs = ((tracked?.breakType.durationSeconds ?? 0) + ACTIVE_GRACE_SECONDS) * 1000
+    if (now - this.active.startedAt > limitMs) this.finishActive()
+  }
+
+  private finishActive(): void {
+    this.active = null
+    // Space out any reminder that queued up behind the one that just ended.
+    const now = Date.now()
+    for (const t of this.breaks.values()) {
+      if (t.nextTriggerAt < now + QUEUE_GAP_MS) t.nextTriggerAt = now + QUEUE_GAP_MS
+    }
   }
 
   private emitStatus(): void {
