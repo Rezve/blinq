@@ -22,7 +22,7 @@ function createTrayIcon(): Electron.NativeImage {
 
 export function createTray(callbacks: TrayCallbacks): Tray {
   tray = new Tray(createTrayIcon())
-  tray.setToolTip('Break Reminder')
+  tray.setToolTip('Blinq')
   tray.on('double-click', callbacks.onOpenSettings)
   updateTrayMenu([], false, callbacks)
   return tray
@@ -44,7 +44,7 @@ export function updateTrayMenu(
       : [{ label: 'No break types configured', enabled: false }]
 
   const contextMenu = Menu.buildFromTemplate([
-    { label: 'Break Reminder', enabled: false },
+    { label: 'Blinq', enabled: false },
     { type: 'separator' },
     ...statusItems,
     { type: 'separator' },
@@ -67,8 +67,8 @@ export function updateTrayMenu(
     const next = statuses.reduce((min, s) => (s.msRemaining < min.msRemaining ? s : min))
     tray.setToolTip(
       paused
-        ? 'Break Reminder (paused)'
-        : `Break Reminder — next: ${next.name} in ${formatDuration(next.msRemaining)}`
+        ? 'Blinq (paused)'
+        : `Blinq — next: ${next.name} in ${formatDuration(next.msRemaining)}`
     )
   }
 }

@@ -55,4 +55,4 @@ const api = {
 
 contextBridge.exposeInMainWorld('api', api)
 
-export type BreakReminderApi = typeof api
+export type BlinqApi = typeof api
