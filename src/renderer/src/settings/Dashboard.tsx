@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { HistoryEntry } from '../../../shared/types'
 
 const DAY_MS = 24 * 60 * 60 * 1000
@@ -89,18 +89,24 @@ interface DashboardProps {
 export default function Dashboard({ history }: DashboardProps): JSX.Element {
   const buckets = useMemo(() => buildDayBuckets(history), [history])
   const streak = useMemo(() => computeStreak(history), [history])
-  const breakTypeStats = useMemo(() => computeBreakTypeStats(history), [history])
-
-  const windowStart = Date.now() - WINDOW_DAYS * DAY_MS
-  const windowEntries = history.filter((e) => e.timestamp >= windowStart)
-  const weekCompleted = windowEntries.filter((e) => e.action === 'completed').length
-  const weekSkipped = windowEntries.filter((e) => e.action === 'skipped').length
-  const weekResolved = weekCompleted + weekSkipped
-  const compliance = weekResolved === 0 ? null : Math.round((weekCompleted / weekResolved) * 100)
 
   const todayKey = dayKey(Date.now())
-  const todayEntries = history.filter((e) => dayKey(e.timestamp) === todayKey)
-  const todayCompleted = todayEntries.filter((e) => e.action === 'completed').length
+  const [selectedKey, setSelectedKey] = useState<string | null>(null)
+  const activeKey = selectedKey ?? todayKey
+  const isToday = activeKey === todayKey
+  const activeBucket = buckets.find((b) => b.key === activeKey)
+  const activeLabel = isToday ? 'today' : (activeBucket?.label ?? '')
+
+  const dayEntries = useMemo(
+    () => history.filter((e) => dayKey(e.timestamp) === activeKey),
+    [history, activeKey]
+  )
+  const breakTypeStats = useMemo(() => computeBreakTypeStats(dayEntries), [dayEntries])
+
+  const dayCompleted = dayEntries.filter((e) => e.action === 'completed').length
+  const daySkipped = dayEntries.filter((e) => e.action === 'skipped').length
+  const dayResolved = dayCompleted + daySkipped
+  const compliance = dayResolved === 0 ? null : Math.round((dayCompleted / dayResolved) * 100)
 
   const maxCount = Math.max(1, ...buckets.map((b) => b.completed + b.skipped))
 
@@ -108,8 +114,8 @@ export default function Dashboard({ history }: DashboardProps): JSX.Element {
     <div className="dashboard">
       <div className="stat-tiles">
         <div className="stat-tile">
-          <span className="stat-value">{todayCompleted}</span>
-          <span className="stat-label">Breaks taken today</span>
+          <span className="stat-value">{dayCompleted}</span>
+          <span className="stat-label">Breaks taken {activeLabel}</span>
         </div>
         <div className="stat-tile">
           <span className="stat-value">{streak}</span>
@@ -117,7 +123,7 @@ export default function Dashboard({ history }: DashboardProps): JSX.Element {
         </div>
         <div className="stat-tile">
           <span className="stat-value">{compliance === null ? '—' : `${compliance}%`}</span>
-          <span className="stat-label">7-day compliance</span>
+          <span className="stat-label">Compliance {activeLabel}</span>
         </div>
       </div>
 
@@ -132,13 +138,19 @@ export default function Dashboard({ history }: DashboardProps): JSX.Element {
               const completedPct = total === 0 ? 0 : (b.completed / maxCount) * 100
               const skippedPct = total === 0 ? 0 : (b.skipped / maxCount) * 100
               return (
-                <div className="bar-col" key={b.key}>
+                <button
+                  type="button"
+                  className={`bar-col${b.key === activeKey ? ' selected' : ''}`}
+                  key={b.key}
+                  onClick={() => setSelectedKey(b.key === todayKey ? null : b.key)}
+                  aria-pressed={b.key === activeKey}
+                >
                   <div className="bar-track">
                     <div className="bar-segment skipped" style={{ height: `${skippedPct}%` }} />
                     <div className="bar-segment completed" style={{ height: `${completedPct}%` }} />
                   </div>
                   <span className="bar-label">{b.label}</span>
-                </div>
+                </button>
               )
             })}
           </div>
@@ -154,9 +166,9 @@ export default function Dashboard({ history }: DashboardProps): JSX.Element {
       </section>
 
       <section>
-        <h2>By Break Type</h2>
+        <h2>By Break Type ({isToday ? 'Today' : activeLabel})</h2>
         {breakTypeStats.length === 0 ? (
-          <p className="muted">Nothing to show yet.</p>
+          <p className="muted">Nothing to show for this day.</p>
         ) : (
           <table className="stat-table">
             <thead>

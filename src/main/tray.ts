@@ -23,6 +23,7 @@ function createTrayIcon(): Electron.NativeImage {
 export function createTray(callbacks: TrayCallbacks): Tray {
   tray = new Tray(createTrayIcon())
   tray.setToolTip('Break Reminder')
+  tray.on('double-click', callbacks.onOpenSettings)
   updateTrayMenu([], false, callbacks)
   return tray
 }
