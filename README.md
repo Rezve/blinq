@@ -3,9 +3,14 @@
 A lightweight Windows desktop app that reminds you to take breaks at intervals you configure. Set up as many break types as you like — a short eye-rest break every 20 minutes, a longer stretch break every hour — and it'll nudge you with a full-screen reminder when it's time.
 
 <p align="center">
-  <img src="docs/settings-window.png" alt="Blinq settings window" width="500">
+  <img src="docs/dashboard-window.png" alt="Blinq dashboard window" width="500">
   &nbsp;&nbsp;
+  <img src="docs/settings-window.png" alt="Blinq settings window" width="500">
+</p>
+<p align="center">
   <img src="docs/reminder-overlay.png" alt="Blinq full-screen reminder overlay" width="500">
+  &nbsp;&nbsp;
+  <img src="docs/ayah_on_every_launch.png" alt="Blinq Quran verse welcome screen on every launch" width="500">
 </p>
 
 ## Features
