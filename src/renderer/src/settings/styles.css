@@ -48,6 +48,13 @@ body {
   margin: 0;
 }
 
+.header h1 .version {
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.55;
+  margin-left: 4px;
+}
+
 .header-actions {
   display: flex;
   align-items: center;

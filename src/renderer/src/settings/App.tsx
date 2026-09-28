@@ -47,6 +47,7 @@ export default function App(): JSX.Element {
   const [paused, setPaused] = useState(false)
   const [savedFlash, setSavedFlash] = useState(false)
   const [history, setHistory] = useState<HistoryEntry[]>([])
+  const [version, setVersion] = useState('')
   const [tab, setTab] = useState<'settings' | 'dashboard'>('dashboard')
 
   useEffect(() => {
@@ -56,6 +57,7 @@ export default function App(): JSX.Element {
       setPaused(s.some((status) => status.paused))
     })
     window.api.getHistory().then(setHistory)
+    window.api.getAppVersion().then(setVersion)
 
     const offStatus = window.api.onTimerStatus((s) => {
       setStatuses(s)
@@ -130,7 +132,9 @@ export default function App(): JSX.Element {
   return (
     <div className="page">
       <header className="header">
-        <h1>Blinq</h1>
+        <h1>
+          Blinq {version && <span className="version">v{version}</span>}
+        </h1>
         <div className="header-actions">
           {savedFlash && <span className="saved-flash">Saved</span>}
           <button className="btn" onClick={() => window.api.showWelcome()}>

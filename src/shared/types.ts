@@ -79,6 +79,7 @@ export const IPC_CHANNELS = {
   REMINDER_SNOOZE: 'reminder:snooze',
   REMINDER_SKIP: 'reminder:skip',
   REMINDER_COMPLETE: 'reminder:complete',
+  APP_VERSION: 'app:version',
   HISTORY_GET: 'history:get',
   HISTORY_CHANGED: 'history:changed',
   WELCOME_VERSE: 'welcome:verse',

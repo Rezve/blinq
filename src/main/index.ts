@@ -137,6 +137,7 @@ function registerIpcHandlers(): void {
   })
   ipcMain.handle(IPC_CHANNELS.WELCOME_DISMISS, () => closeWelcomeWindow())
 
+  ipcMain.handle(IPC_CHANNELS.APP_VERSION, () => app.getVersion())
   ipcMain.handle(IPC_CHANNELS.HISTORY_GET, () => loadHistory())
 }
 
