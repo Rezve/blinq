@@ -43,6 +43,8 @@ const api = {
   showWelcome: (): Promise<void> => ipcRenderer.invoke(IPC_CHANNELS.WELCOME_SHOW),
   welcomeDismiss: (): Promise<void> => ipcRenderer.invoke(IPC_CHANNELS.WELCOME_DISMISS),
 
+  getAppVersion: (): Promise<string> => ipcRenderer.invoke(IPC_CHANNELS.APP_VERSION),
+
   getHistory: (): Promise<HistoryEntry[]> => ipcRenderer.invoke(IPC_CHANNELS.HISTORY_GET),
   onHistoryChanged: (callback: (entries: HistoryEntry[]) => void): (() => void) => {
     const listener = (_event: unknown, entries: HistoryEntry[]): void => callback(entries)
