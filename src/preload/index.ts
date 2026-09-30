@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { AppSettings, BreakStatus, HistoryEntry, IPC_CHANNELS, ReminderPayload, Verse } from '../shared/types'
+import { AppSettings, BreakStatus, HistoryEntry, IPC_CHANNELS, ReminderPayload, UpdateStatus, Verse } from '../shared/types'
 
 const api = {
   getSettings: (): Promise<AppSettings> => ipcRenderer.invoke(IPC_CHANNELS.SETTINGS_GET),
@@ -44,6 +44,17 @@ const api = {
   welcomeDismiss: (): Promise<void> => ipcRenderer.invoke(IPC_CHANNELS.WELCOME_DISMISS),
 
   getAppVersion: (): Promise<string> => ipcRenderer.invoke(IPC_CHANNELS.APP_VERSION),
+
+  getUpdateStatus: (): Promise<UpdateStatus> => ipcRenderer.invoke(IPC_CHANNELS.UPDATE_GET_STATUS),
+  checkForUpdates: (): Promise<void> => ipcRenderer.invoke(IPC_CHANNELS.UPDATE_CHECK),
+  installUpdate: (): Promise<void> => ipcRenderer.invoke(IPC_CHANNELS.UPDATE_INSTALL),
+  onUpdateStatus: (callback: (status: UpdateStatus) => void): (() => void) => {
+    const listener = (_event: unknown, status: UpdateStatus): void => callback(status)
+    ipcRenderer.on(IPC_CHANNELS.UPDATE_STATUS, listener)
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.UPDATE_STATUS, listener)
+    }
+  },
 
   getHistory: (): Promise<HistoryEntry[]> => ipcRenderer.invoke(IPC_CHANNELS.HISTORY_GET),
   onHistoryChanged: (callback: (entries: HistoryEntry[]) => void): (() => void) => {

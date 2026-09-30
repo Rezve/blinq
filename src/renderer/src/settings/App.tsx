@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AppSettings, BreakStatus, BreakType, HistoryEntry } from '../../../shared/types'
+import { AppSettings, BreakStatus, BreakType, HistoryEntry, UpdateStatus } from '../../../shared/types'
 import Dashboard from './Dashboard'
 
 function makeId(): string {
@@ -41,6 +41,37 @@ function NumberField({ min, value, onCommit }: NumberFieldProps): JSX.Element {
   )
 }
 
+function UpdateControl({ status }: { status: UpdateStatus }): JSX.Element | null {
+  switch (status.state) {
+    case 'available':
+      return <span className="saved-flash">Update v{status.version} found…</span>
+    case 'downloading':
+      return <span className="saved-flash">Downloading v{status.version} {Math.round(status.percent)}%</span>
+    case 'downloaded':
+      return (
+        <button className="btn primary" onClick={() => window.api.installUpdate()}>
+          Restart to update to v{status.version}
+        </button>
+      )
+    case 'checking':
+      return <span className="saved-flash">Checking for updates…</span>
+    case 'up-to-date':
+      return <span className="saved-flash">Up to date</span>
+    case 'error':
+      return (
+        <button className="btn" title={status.message} onClick={() => window.api.checkForUpdates()}>
+          Update check failed – retry
+        </button>
+      )
+    default:
+      return (
+        <button className="btn" onClick={() => window.api.checkForUpdates()}>
+          Check for updates
+        </button>
+      )
+  }
+}
+
 export default function App(): JSX.Element {
   const [settings, setSettings] = useState<AppSettings | null>(null)
   const [statuses, setStatuses] = useState<BreakStatus[]>([])
@@ -48,6 +79,7 @@ export default function App(): JSX.Element {
   const [savedFlash, setSavedFlash] = useState(false)
   const [history, setHistory] = useState<HistoryEntry[]>([])
   const [version, setVersion] = useState('')
+  const [update, setUpdate] = useState<UpdateStatus>({ state: 'idle' })
   const [tab, setTab] = useState<'settings' | 'dashboard'>('dashboard')
 
   useEffect(() => {
@@ -58,6 +90,8 @@ export default function App(): JSX.Element {
     })
     window.api.getHistory().then(setHistory)
     window.api.getAppVersion().then(setVersion)
+    window.api.getUpdateStatus().then(setUpdate)
+    const offUpdate = window.api.onUpdateStatus(setUpdate)
 
     const offStatus = window.api.onTimerStatus((s) => {
       setStatuses(s)
@@ -67,6 +101,7 @@ export default function App(): JSX.Element {
     const offHistory = window.api.onHistoryChanged((h) => setHistory(h))
 
     return () => {
+      offUpdate()
       offStatus()
       offSettings()
       offHistory()
@@ -136,6 +171,7 @@ export default function App(): JSX.Element {
           Blinq {version && <span className="version">v{version}</span>}
         </h1>
         <div className="header-actions">
+          <UpdateControl status={update} />
           {savedFlash && <span className="saved-flash">Saved</span>}
           <button className="btn" onClick={() => window.api.showWelcome()}>
             Verse of the Moment

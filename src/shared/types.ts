@@ -85,5 +85,18 @@ export const IPC_CHANNELS = {
   WELCOME_VERSE: 'welcome:verse',
   WELCOME_OPEN_SETTINGS: 'welcome:open-settings',
   WELCOME_DISMISS: 'welcome:dismiss',
-  WELCOME_SHOW: 'welcome:show'
+  WELCOME_SHOW: 'welcome:show',
+  UPDATE_STATUS: 'update:status',
+  UPDATE_GET_STATUS: 'update:get-status',
+  UPDATE_CHECK: 'update:check',
+  UPDATE_INSTALL: 'update:install'
 } as const
+
+export type UpdateStatus =
+  | { state: 'idle' }
+  | { state: 'checking' }
+  | { state: 'available'; version: string }
+  | { state: 'downloading'; version: string; percent: number }
+  | { state: 'downloaded'; version: string }
+  | { state: 'up-to-date' }
+  | { state: 'error'; message: string }
