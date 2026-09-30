@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "predist": "npm version patch --no-git-tag-version",
     "dist": "electron-vite build && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win",
-    "release": "electron-vite build && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder --win --publish always"
+    "prerelease": "node scripts/bump-version.mjs",
+    "release": "electron-vite build && cross-env CSC_IDENTITY_AUTO_DISCOVERY=false node --env-file=.env node_modules/electron-builder/cli.js --win --publish always"
   },
   "dependencies": {
     "electron-updater": "^6.8.9",
