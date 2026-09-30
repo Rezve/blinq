@@ -14,6 +14,21 @@ extraResources:
 win:
   target: nsis
   icon: build/icon.ico
+mac:
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+    - target: zip
+      arch: [x64, arm64]
+  icon: build/icon.png
+  category: public.app-category.healthcare-fitness
+linux:
+  target:
+    - AppImage
+    - deb
+  icon: build/icon.png
+  category: Utility
+  maintainer: blinq
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
