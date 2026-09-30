@@ -4,6 +4,7 @@ import { addHistoryEntry, loadHistory } from './historyStore'
 import { loadSettings, saveSettings } from './settingsStore'
 import { getRandomVerse } from './verses'
 import { TimerManager } from './timerManager'
+import { initAutoUpdater } from './updater'
 import { createTray, updateTrayMenu } from './tray'
 import {
   closeWelcomeWindow,
@@ -161,6 +162,7 @@ app.whenReady().then(() => {
 
   createTray(trayCallbacks)
   createWelcomeWindow()
+  initAutoUpdater(createSettingsWindow)
 
   app.on('activate', () => {
     createSettingsWindow()
