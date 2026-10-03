@@ -44,7 +44,7 @@ function NumberField({ min, value, onCommit }: NumberFieldProps): JSX.Element {
 function UpdateControl({ status }: { status: UpdateStatus }): JSX.Element | null {
   switch (status.state) {
     case 'available':
-      return <span className="saved-flash">Update v{status.version} found…</span>
+      return <span className="saved-flash">Update v{status.version} foundâ€¦</span>
     case 'downloading':
       return <span className="saved-flash">Downloading v{status.version} {Math.round(status.percent)}%</span>
     case 'downloaded':
@@ -54,13 +54,13 @@ function UpdateControl({ status }: { status: UpdateStatus }): JSX.Element | null
         </button>
       )
     case 'checking':
-      return <span className="saved-flash">Checking for updates…</span>
+      return <span className="saved-flash">Checking for updatesâ€¦</span>
     case 'up-to-date':
-      return <span className="saved-flash">Up to date</span>
+      return null
     case 'error':
       return (
         <button className="btn" title={status.message} onClick={() => window.api.checkForUpdates()}>
-          Update check failed – retry
+          Update check failed â€“ retry
         </button>
       )
     default:
