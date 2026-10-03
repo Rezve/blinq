@@ -5,6 +5,9 @@ name: Release macOS and Linux
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
