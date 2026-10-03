@@ -153,6 +153,8 @@ app.on('second-instance', () => {
 
 app.whenReady().then(() => {
   if (!gotLock) return
+  // Must match build.appId so Windows toasts use the installed app's name and icon.
+  app.setAppUserModelId('com.blinq.app')
   registerIpcHandlers()
   applyLoginItemSetting()
 
@@ -162,7 +164,7 @@ app.whenReady().then(() => {
 
   createTray(trayCallbacks)
   createWelcomeWindow()
-  initAutoUpdater(createSettingsWindow)
+  initAutoUpdater(createSettingsWindow, () => settings)
 
   app.on('activate', () => {
     createSettingsWindow()

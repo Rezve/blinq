@@ -41,10 +41,16 @@ function NumberField({ min, value, onCommit }: NumberFieldProps): JSX.Element {
   )
 }
 
-function UpdateControl({ status }: { status: UpdateStatus }): JSX.Element | null {
+function UpdateControl({ status, autoUpdate }: { status: UpdateStatus; autoUpdate: boolean }): JSX.Element | null {
   switch (status.state) {
     case 'available':
-      return <span className="saved-flash">Update v{status.version} found…</span>
+      return autoUpdate ? (
+        <span className="saved-flash">Update v{status.version} found…</span>
+      ) : (
+        <button className="btn primary" onClick={() => window.api.downloadUpdate()}>
+          Download v{status.version}
+        </button>
+      )
     case 'downloading':
       return <span className="saved-flash">Downloading v{status.version} {Math.round(status.percent)}%</span>
     case 'downloaded':
@@ -80,7 +86,7 @@ export default function App(): JSX.Element {
   const [history, setHistory] = useState<HistoryEntry[]>([])
   const [version, setVersion] = useState('')
   const [update, setUpdate] = useState<UpdateStatus>({ state: 'idle' })
-  const [tab, setTab] = useState<'settings' | 'dashboard'>('dashboard')
+  const [tab, setTab] = useState<'dashboard' | 'breaks' | 'settings'>('dashboard')
 
   useEffect(() => {
     window.api.getSettings().then(setSettings)
@@ -171,7 +177,6 @@ export default function App(): JSX.Element {
           Blinq {version && <span className="version">v{version}</span>}
         </h1>
         <div className="header-actions">
-          <UpdateControl status={update} />
           {savedFlash && <span className="saved-flash">Saved</span>}
           <button className="btn" onClick={() => window.api.showWelcome()}>
             Verse of the Moment
@@ -182,9 +187,23 @@ export default function App(): JSX.Element {
         </div>
       </header>
 
+      {(update.state === 'downloaded' || (update.state === 'available' && !settings.autoUpdate)) && (
+        <div className="update-banner">
+          <span>
+            {update.state === 'downloaded'
+              ? `Update v${update.version} is ready to install.`
+              : `Update v${update.version} is available.`}
+          </span>
+          <UpdateControl status={update} autoUpdate={settings.autoUpdate} />
+        </div>
+      )}
+
       <div className="tabs">
         <button className={tab === 'dashboard' ? 'tab active' : 'tab'} onClick={() => setTab('dashboard')}>
           Dashboard
+        </button>
+        <button className={tab === 'breaks' ? 'tab active' : 'tab'} onClick={() => setTab('breaks')}>
+          Breaks
         </button>
         <button className={tab === 'settings' ? 'tab active' : 'tab'} onClick={() => setTab('settings')}>
           Settings
@@ -194,8 +213,7 @@ export default function App(): JSX.Element {
       <div className="content-scroll">
       {tab === 'dashboard' ? (
         <Dashboard history={history} statuses={statuses} breakTypes={settings.breakTypes} />
-      ) : (
-      <>
+      ) : tab === 'breaks' ? (
       <section>
         <div className="section-header">
           <h2>Break Types</h2>
@@ -250,7 +268,8 @@ export default function App(): JSX.Element {
           ))}
         </div>
       </section>
-
+      ) : (
+      <>
       <section>
         <h2>General</h2>
         <div className="row">
@@ -262,6 +281,8 @@ export default function App(): JSX.Element {
               onCommit={(snoozeMinutes) => persist({ ...settings, snoozeMinutes })}
             />
           </label>
+        </div>
+        <div className="checkbox-list">
           <label className="checkbox">
             <input
               type="checkbox"
@@ -278,6 +299,38 @@ export default function App(): JSX.Element {
             />
             Merge overlapping reminders (longer break replaces shorter ones)
           </label>
+        </div>
+      </section>
+
+      <section>
+        <h2>Updates</h2>
+        <div className="checkbox-list">
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              checked={settings.checkForUpdates}
+              onChange={(e) =>
+                persist({
+                  ...settings,
+                  checkForUpdates: e.target.checked,
+                  autoUpdate: e.target.checked ? settings.autoUpdate : false
+                })
+              }
+            />
+            Check for updates automatically
+          </label>
+          <label className="checkbox">
+            <input
+              type="checkbox"
+              checked={settings.autoUpdate}
+              disabled={!settings.checkForUpdates}
+              onChange={(e) => persist({ ...settings, autoUpdate: e.target.checked })}
+            />
+            Download updates automatically
+          </label>
+        </div>
+        <div className="update-status">
+          <UpdateControl status={update} autoUpdate={settings.autoUpdate} />
         </div>
       </section>
       </>

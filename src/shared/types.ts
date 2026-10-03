@@ -11,6 +11,8 @@ export interface AppSettings {
   snoozeMinutes: number
   launchOnStartup: boolean
   mergeOverlapping: boolean
+  checkForUpdates: boolean
+  autoUpdate: boolean
 }
 
 export interface BreakStatus {
@@ -63,7 +65,9 @@ export const DEFAULT_SETTINGS: AppSettings = {
     }
   ],
   snoozeMinutes: 5,
-  launchOnStartup: false,
+  launchOnStartup: true,
+  checkForUpdates: true,
+  autoUpdate: false,
   mergeOverlapping: true
 }
 
@@ -89,6 +93,7 @@ export const IPC_CHANNELS = {
   UPDATE_STATUS: 'update:status',
   UPDATE_GET_STATUS: 'update:get-status',
   UPDATE_CHECK: 'update:check',
+  UPDATE_DOWNLOAD: 'update:download',
   UPDATE_INSTALL: 'update:install'
 } as const
 
