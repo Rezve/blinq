@@ -47,7 +47,8 @@ const api = {
 
   getUpdateStatus: (): Promise<UpdateStatus> => ipcRenderer.invoke(IPC_CHANNELS.UPDATE_GET_STATUS),
   checkForUpdates: (): Promise<void> => ipcRenderer.invoke(IPC_CHANNELS.UPDATE_CHECK),
-  installUpdate: (): Promise<void> => ipcRenderer.invoke(IPC_CHANNELS.UPDATE_INSTALL),
+  downloadUpdate: (): Promise<void> => ipcRenderer.invoke(IPC_CHANNELS.UPDATE_DOWNLOAD),
+  installUpdate:(): Promise<void> => ipcRenderer.invoke(IPC_CHANNELS.UPDATE_INSTALL),
   onUpdateStatus: (callback: (status: UpdateStatus) => void): (() => void) => {
     const listener = (_event: unknown, status: UpdateStatus): void => callback(status)
     ipcRenderer.on(IPC_CHANNELS.UPDATE_STATUS, listener)
