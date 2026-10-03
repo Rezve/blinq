@@ -61,5 +61,7 @@ const body = [
   previous ? `\n**Full changelog:** https://github.com/${repo}/compare/${previous.tag_name}...${tag}` : ''
 ].join('\n')
 
-await api(`/releases/${current.id}`, { method: 'PATCH', body: JSON.stringify({ body }) })
+// tag_name must be resent: patching a draft without it resets the tag to "untagged-…",
+// which makes the macOS/Linux workflow miss this draft and create a second one.
+await api(`/releases/${current.id}`, { method: 'PATCH', body: JSON.stringify({ body, tag_name: tag }) })
 console.log(`Updated release notes for ${tag}:\n${body}`)
