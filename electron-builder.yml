@@ -13,6 +13,7 @@ extraResources:
       - '**/*'
 win:
   target: nsis
+  artifactName: ${productName}-Setup-${version}.${ext}
   icon: build/icon.ico
 mac:
   target:
